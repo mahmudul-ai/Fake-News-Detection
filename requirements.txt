@@ -1,0 +1,7 @@
+datasets
+pandas
+numpy
+nltk
+transformers
+spacy
+torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
