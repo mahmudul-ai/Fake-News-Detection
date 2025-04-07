@@ -1,0 +1,23 @@
+{
+    "workspace": "LIAR2/",
+    "model_save": "LIAR2.pt",
+    "model_name": "LIAR2",
+    "num_epochs": 10,
+    "batch_size": 32,
+    "learning_rate": 1e-3,
+    "num_classes": 6,
+    "padding_idx": 0,
+    "metadata_each_dim": 10,
+    "vocab_size": 30522,
+    "embedding_dim": 128,
+    "n_filters": 128,
+    "filter_sizes": [3, 4, 5],
+    "output_dim": 6,
+    "dropout": 0.5,
+    "input_dim": 60,
+    "input_dim_metadata": 6,
+    "hidden_dim": 64,
+    "n_layers": 1,
+    "bidirectional": true
+  }
+  
