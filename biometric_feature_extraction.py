@@ -44,15 +44,15 @@ train_data = pd.read_csv(workspace + 'train.csv')
 test_data = pd.read_csv(workspace + 'test.csv')
 val_data = pd.read_csv(workspace + 'valid.csv')
 
-# Replace NaN values with 'NaN'
-train_data[["true_counts", "mostly_true_counts", "half_true_counts", "mostly_false_counts", "false_counts", "pants_on_fire_counts"]] = train_data[["true_counts", "mostly_true_counts", "half_true_counts", "mostly_false_counts", "false_counts", "pants_on_fire_counts"]].fillna(0)
-train_data.fillna('NaN', inplace=True)
+# # Replace NaN values with 'NaN'
+# train_data[["true_counts", "mostly_true_counts", "half_true_counts", "mostly_false_counts", "false_counts", "pants_on_fire_counts"]] = train_data[["true_counts", "mostly_true_counts", "half_true_counts", "mostly_false_counts", "false_counts", "pants_on_fire_counts"]].fillna(0)
+# train_data.fillna('NaN', inplace=True)
 
-test_data[["true_counts", "mostly_true_counts", "half_true_counts", "mostly_false_counts", "false_counts", "pants_on_fire_counts"]] = test_data[["true_counts", "mostly_true_counts", "half_true_counts", "mostly_false_counts", "false_counts", "pants_on_fire_counts"]].fillna(0)
-test_data.fillna('NaN', inplace=True)
+# test_data[["true_counts", "mostly_true_counts", "half_true_counts", "mostly_false_counts", "false_counts", "pants_on_fire_counts"]] = test_data[["true_counts", "mostly_true_counts", "half_true_counts", "mostly_false_counts", "false_counts", "pants_on_fire_counts"]].fillna(0)
+# test_data.fillna('NaN', inplace=True)
 
-val_data[["true_counts", "mostly_true_counts", "half_true_counts", "mostly_false_counts", "false_counts", "pants_on_fire_counts"]] = val_data[["true_counts", "mostly_true_counts", "half_true_counts", "mostly_false_counts", "false_counts", "pants_on_fire_counts"]].fillna(0)
-val_data.fillna('NaN', inplace=True)
+# val_data[["true_counts", "mostly_true_counts", "half_true_counts", "mostly_false_counts", "false_counts", "pants_on_fire_counts"]] = val_data[["true_counts", "mostly_true_counts", "half_true_counts", "mostly_false_counts", "false_counts", "pants_on_fire_counts"]].fillna(0)
+# val_data.fillna('NaN', inplace=True)
 
 
 def clean_text(text):
@@ -74,16 +74,16 @@ def clean_text(text):
     return text
 
 
-train_data['speaker_description'] = train_data['speaker_description'].apply(clean_text)
-train_data['justification'] = train_data['justification'].apply(clean_text)
+# train_data['speaker_description'] = train_data['speaker_description'].apply(clean_text)
+# train_data['justification'] = train_data['justification'].apply(clean_text)
 
-# X_test['statement'] = X_test['statement'].apply(clean_text)
-test_data['speaker_description'] = test_data['speaker_description'].apply(clean_text)
-test_data['justification'] = test_data['justification'].apply(clean_text)
+# # X_test['statement'] = X_test['statement'].apply(clean_text)
+# test_data['speaker_description'] = test_data['speaker_description'].apply(clean_text)
+# test_data['justification'] = test_data['justification'].apply(clean_text)
 
-# X_val['statement'] = X_val['statement'].apply(clean_text)
-val_data['speaker_description'] = val_data['speaker_description'].apply(clean_text)
-val_data['justification'] = val_data['justification'].apply(clean_text)
+# # X_val['statement'] = X_val['statement'].apply(clean_text)
+# val_data['speaker_description'] = val_data['speaker_description'].apply(clean_text)
+# val_data['justification'] = val_data['justification'].apply(clean_text)
 
 
 def analyze_text(text, clean = True, inplace=False):

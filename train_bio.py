@@ -41,7 +41,7 @@ print("PyTorch Version : {}".format(torch.__version__))
 print(DEVICE)
 
 # Setting up the logging
-logging.basicConfig(filename='training_log.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
+logging.basicConfig(filename='training_log_bio.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
 logging.info("PyTorch Version : {}".format(torch.__version__))
 logging.info("Using device: {}".format(DEVICE))
 

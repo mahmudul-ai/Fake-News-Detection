@@ -10,7 +10,7 @@ np.random.seed(42)
 torch.manual_seed(42)
 
 # Check if CUDA (GPU) is available
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load configuration from JSON file
 with open('config-biometric.json', 'r') as f:
@@ -43,13 +43,13 @@ def load_data(path):
     ]
     df[count_cols] = df[count_cols].fillna(0)
     df.fillna("NaN", inplace=True)
-    # df['sentiment_label'] = df['sentiment_label'].map(sentiment_convert)
+    df['sentiment_label'] = df['sentiment_label'].map(sentiment_convert)
     print(f"[load_data] Done in {time.time()-t0:.2f}s — {len(df)} rows")
     return df
 
 
 def textProcess(input_text, max_length = -1):
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', device=device)
     if max_length == -1:
         tokens = tokenizer(input_text, truncation=True, padding=True)
     else:
@@ -123,11 +123,11 @@ def build_dataset(df):
     t0 = time.time()
 
     # 1) text & justification
-    statement = torch.tensor(textProcess(df['statement'].tolist())['input_ids'])
-    justification = torch.tensor(textProcess(df['justification'].tolist())['input_ids'])
+    statement = torch.tensor(textProcess(df['statement'].tolist())['input_ids'], device=device)
+    justification = torch.tensor(textProcess(df['justification'].tolist())['input_ids'], device=device)
 
     # 2) labels
-    label_onehot  = torch.nn.functional.one_hot(torch.tensor(df['label'].replace(label_convert)), num_classes=6).type(torch.float64)
+    label_onehot  = torch.nn.functional.one_hot(torch.tensor(df['label'].replace(label_convert), device=device), num_classes=6).type(torch.float64)
 
     # 3) text‐metadata fields
     # text_metadata = lambda col: torch.tensor(
@@ -136,15 +136,21 @@ def build_dataset(df):
     #     'date','subject','speaker','speaker_description','state_info','context'
     # ])
     text_cols = ['date', 'subject', 'speaker', 'speaker_description', 'state_info', 'context']
-    text_metadata = [torch.tensor(textProcess(df[col].tolist(), metadata_each_dim)['input_ids']).int() for col in text_cols]
+    text_metadata = [torch.tensor(textProcess(df[col].tolist(), metadata_each_dim)['input_ids'], device=device).int() for col in text_cols]
 
     # 4) numeric metadata columns
-    num_cols = ['true_counts', 'mostly_true_counts', 'half_true_counts',
+    num_cols = [
+        'true_counts', 'mostly_true_counts', 'half_true_counts',
                 'mostly_false_counts', 'false_counts', 'pants_on_fire_counts',
                 # 'ttr', 'exclamation_count', 'adjective_count',
-                # 'sentiment_label', 'sentiment_score', 'subjectivity_score',
+                # # 'sentiment_label', 
+                # 'sentiment_score', 'subjectivity_score',
+                # 'contradiction_score'
                 ]
-    num_metadata = [torch.tensor(df[col].tolist(), dtype=torch.float).unsqueeze(1) for col in num_cols]
+    num_metadata = [torch.tensor(df[col].tolist(), dtype=torch.float, device=device).unsqueeze(1) for col in num_cols]
+
+    # num_metadata = [torch.tensor(df['sentiment_label'].replace(sentiment_convert).tolist(), dtype=torch.float, device=device).unsqueeze(1)] + num_metadata
+
 
     # # 5) trigram embeddings
     # trig_emb = get_weighted_trigram_embeddings(
@@ -152,7 +158,7 @@ def build_dataset(df):
     # )
 
     ds = LiarDataset(
-        df, statement, label_onehot, torch.tensor(df['label'].replace(label_convert)), justification,
+        df, statement, label_onehot, torch.tensor(df['label'].replace(label_convert), device=device), justification,
         text_metadata,
         num_metadata
         # ,
