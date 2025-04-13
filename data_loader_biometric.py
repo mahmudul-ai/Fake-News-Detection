@@ -145,8 +145,8 @@ def build_dataset(df):
                 'ttr', 'exclamation_count', 'adjective_count',
                 # 'sentiment_label', 
                 'sentiment_score', 
-                # 'subjectivity_score',
-                # 'contradiction_score'
+                'subjectivity_score',
+                'contradiction_score'
                 ]
     num_metadata = [torch.tensor(df[col].tolist(), dtype=torch.float, device=device).unsqueeze(1) for col in num_cols]
 

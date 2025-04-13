@@ -1,3 +1,6 @@
-2025-04-07 23:29:20,964 - PyTorch Version: 2.6.0+cu124
-2025-04-07 23:29:20,964 - Using device: cuda
-2025-04-07 23:29:26,143 - Test Loss: 0.2216, Test Acc: 0.6960, Test F1 Macro: 0.6870, Test F1 Micro: 0.6960
+2025-04-12 23:51:05,765 - PyTorch Version: 2.6.0+cu124
+2025-04-12 23:51:05,765 - Using device: cuda
+2025-04-12 23:51:10,344 - Test Loss: 0.2231, Test Acc: 0.6938, Test F1 Macro: 0.6856, Test F1 Micro: 0.6938
+2025-04-12 23:53:59,783 - PyTorch Version: 2.6.0+cu124
+2025-04-12 23:53:59,783 - Using device: cuda
+2025-04-12 23:54:04,530 - Test Loss: 0.2161, Test Acc: 0.7017, Test F1 Macro: 0.6929, Test F1 Micro: 0.7017
