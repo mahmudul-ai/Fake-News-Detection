@@ -1,7 +1,6 @@
+# Fake News Detection Using Linguistic and Behavioral Biometrics
 
-# Fake-News-Detection
-
-The dependencies are available at "requirements.txt". Run the following command to install them:
+The dependencies are available at `requirements.txt`. Run the following command to install them:
 
     pip install -r requirements.txt
 
