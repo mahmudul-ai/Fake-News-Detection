@@ -6,64 +6,7 @@ import logging
 from sklearn.metrics import f1_score
 from data_loader_biometric import train_loader, val_loader
 import json
-
-# Load configuration from JSON file
-with open('config-biometric.json', 'r') as f:
-    config = json.load(f)
-
-# Access configuration values
-workspace = config["workspace"]
-model_save = config["model_save"]
-# model_name = config["model_name"]
-num_epochs = config["num_epochs"]
-batch_size = config["batch_size"]
-learning_rate = config["learning_rate"]
-# num_classes = config["num_classes"]
-padding_idx = config["padding_idx"]
-
-
-vocab_size = config["vocab_size"]
-embedding_dim = config["embedding_dim"]
-n_filters = config["n_filters"]
-filter_sizes = config["filter_sizes"]
-output_dim = config["output_dim"]
-dropout = config["dropout"]
-input_dim = config["input_dim"]
-input_dim_metadata = config["input_dim_metadata"]
-hidden_dim = config["hidden_dim"]
-n_layers = config["n_layers"]
-bidirectional = config["bidirectional"]
-
-torch.manual_seed(42)
-
-DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-print("PyTorch Version : {}".format(torch.__version__))
-print(DEVICE)
-
-# Setting up the logging
-logging.basicConfig(filename='training_log_bio.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
-logging.info("PyTorch Version : {}".format(torch.__version__))
-logging.info("Using device: {}".format(DEVICE))
-
-
-model = LiarModel(vocab_size, embedding_dim, n_filters, filter_sizes, output_dim, dropout, padding_idx, input_dim, input_dim_metadata, hidden_dim, n_layers, bidirectional).to(DEVICE)
-
-
-# Define the optimizer and loss function
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-criterion = nn.BCEWithLogitsLoss()
-
-
-# Record the training process
-Train_acc = []
-Train_loss = []
-Train_macro_f1 = []
-Train_micro_f1 = []
-
-Val_acc = []
-Val_loss = []
-Val_macro_f1 = []
-Val_micro_f1 = []
+import csv
 
 def train(num_epochs, model, train_loader, val_loader, optimizer, criterion, model_save):
     epoch_trained = 0
@@ -152,6 +95,21 @@ def train(num_epochs, model, train_loader, val_loader, optimizer, criterion, mod
         log_message = f"Epoch [{epoch+1}/{num_epochs}], Time: {epoch_time:.2f}s, Train Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}, Train F1 Macro: {train_macro_f1:.4f}, Train F1 Micro: {train_micro_f1:.4f}, Val Loss: {val_loss:.4f}, Val Acc: {val_accuracy:.4f}, Val F1 Macro: {val_macro_f1:.4f}, Val F1 Micro: {val_micro_f1:.4f}"
         print(log_message)
         logging.info(log_message)
+
+        # Append performance metrics to CSV file
+        with open(performance_log_file, mode='a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                epoch + 1,
+                round(train_loss, 4),
+                round(train_accuracy.item(), 4),
+                round(train_macro_f1, 4),
+                round(train_micro_f1, 4),
+                round(val_loss, 4),
+                round(val_accuracy.item(), 4),
+                round(val_macro_f1, 4),
+                round(val_micro_f1, 4)
+            ])
         
 
     end_time = time.time()
@@ -159,6 +117,86 @@ def train(num_epochs, model, train_loader, val_loader, optimizer, criterion, mod
     print(f'Total Training Time: {training_time:.2f}s')
     logging.info(f'Total Training Time: {training_time:.2f}s')
 
+# Load configuration from JSON file
+filename = 'config-biometric.json'
+with open(filename, 'r') as f:
+    config = json.load(f)
+
+for i in range(13):
+    # Access configuration values
+    workspace = config["workspace"]
+    # model_save = config["model_save"]
+    model_save = f"{i+1}_model_bio.pt"
+    # model_name = config["model_name"]
+    num_epochs = config["num_epochs"]
+    batch_size = config["batch_size"]
+    learning_rate = config["learning_rate"]
+    # num_classes = config["num_classes"]
+    padding_idx = config["padding_idx"]
 
 
-train(num_epochs, model, train_loader(batch_size=batch_size), val_loader(batch_size=batch_size), optimizer, criterion, model_save)
+    vocab_size = config["vocab_size"]
+    embedding_dim = config["embedding_dim"]
+    n_filters = config["n_filters"]
+    filter_sizes = config["filter_sizes"]
+    output_dim = config["output_dim"]
+    input_dim_metadata = 1
+    dropout = config["dropout"]
+    input_dim = config["input_dim"]
+    # input_dim_metadata = config["input_dim_metadata"]
+    hidden_dim = config["hidden_dim"]
+    n_layers = config["n_layers"]
+    bidirectional = config["bidirectional"]
+    # Define CSV filename
+    performance_log_file = f"{i + 1}_training_performance_log.csv"
+
+    # config["input_dim_metadata"] = input_dim_metadata
+
+    # with open(filename, 'w') as f:
+    #             json.dump(config, f, indent=4)
+
+    torch.manual_seed(42)
+
+    DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    print("PyTorch Version : {}".format(torch.__version__))
+    print(DEVICE)
+
+    # Setting up the logging
+    logging.basicConfig(filename=f'{i+1}_training_log_bio.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
+    logging.info("PyTorch Version : {}".format(torch.__version__))
+    logging.info("Using device: {}".format(DEVICE))
+
+
+    model = LiarModel(vocab_size, embedding_dim, n_filters, filter_sizes, output_dim, dropout, padding_idx, input_dim, input_dim_metadata, hidden_dim, n_layers, bidirectional).to(DEVICE)
+
+
+    # Define the optimizer and loss function
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    criterion = nn.BCEWithLogitsLoss()
+
+
+    # Record the training process
+    Train_acc = []
+    Train_loss = []
+    Train_macro_f1 = []
+    Train_micro_f1 = []
+
+    Val_acc = []
+    Val_loss = []
+    Val_macro_f1 = []
+    Val_micro_f1 = []
+
+    # Initialize CSV log with headers
+    with open(performance_log_file, mode='w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow([
+            "Epoch", "Train Loss", "Train Acc", "Train F1 Macro", "Train F1 Micro",
+            "Val Loss", "Val Acc", "Val F1 Macro", "Val F1 Micro"
+        ])
+
+
+
+
+
+    train(num_epochs, model, train_loader(batch_size=batch_size, input_dim_metadata=i+1), val_loader(batch_size=batch_size, input_dim_metadata=input_dim_metadata), optimizer, criterion, model_save)
+    

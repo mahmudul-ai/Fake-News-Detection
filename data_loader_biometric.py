@@ -11,9 +11,9 @@ torch.manual_seed(42)
 
 # Check if CUDA (GPU) is available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+filename = 'config-biometric.json'
 # Load configuration from JSON file
-with open('config-biometric.json', 'r') as f:
+with open(filename, 'r') as f:
     config = json.load(f)
 
 
@@ -25,6 +25,13 @@ label_convert = {'pants-fire': 0, 'false': 1, 'barely-true': 2,
                  'half-true': 3, 'mostly-true': 4, 'true': 5}
 
 sentiment_convert = {'NEGATIVE': 0, 'POSITIVE': 1}
+
+
+
+# config["num_classes"] = len(num_cols)
+
+# with open(filename, 'w') as f:
+#             json.dump(config, f, indent=4)
 
 # Initialize tokenizer and BERT model
 # tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
@@ -117,7 +124,7 @@ class LiarDataset(data.Dataset):
         )
 
 
-def build_dataset(df):
+def build_dataset(df, input_dim_metadata):
     """Tokenize, embed, and wrap a DataFrame into LiarDataset."""
     print(f"[build_dataset] building for {len(df)} rows…")
     t0 = time.time()
@@ -130,24 +137,29 @@ def build_dataset(df):
     label_onehot  = torch.nn.functional.one_hot(torch.tensor(df['label'].replace(label_convert), device=device), num_classes=6).type(torch.float64)
 
     # 3) text‐metadata fields
+    
+    text_cols = ['date', 'subject', 'speaker', 'speaker_description', 'state_info', 'context']
+
     # text_metadata = lambda col: torch.tensor(
     #     textProcess(df[col].tolist(), metadata_each_dim)['input_ids'])
     # date, subject, speaker, speaker_description, state_info, context = map(text_metadata, [
     #     'date','subject','speaker','speaker_description','state_info','context'
     # ])
-    text_cols = ['date', 'subject', 'speaker', 'speaker_description', 'state_info', 'context']
+    
     text_metadata = [torch.tensor(textProcess(df[col].tolist(), metadata_each_dim)['input_ids'], device=device).int() for col in text_cols]
 
     # 4) numeric metadata columns
     num_cols = [
         'true_counts', 'mostly_true_counts', 'half_true_counts',
                 'mostly_false_counts', 'false_counts', 'pants_on_fire_counts',
-                'ttr', 'exclamation_count', 'adjective_count',
-                # 'sentiment_label', 
-                'sentiment_score', 
+                'ttr', 'exclamation_count', 'adjective_count', 
+                'sentiment_score',
+                'sentiment_label',
                 'subjectivity_score',
                 'contradiction_score'
                 ]
+    
+    num_cols = [num_cols[input_dim_metadata-1]]
     num_metadata = [torch.tensor(df[col].tolist(), dtype=torch.float, device=device).unsqueeze(1) for col in num_cols]
 
     # num_metadata = [torch.tensor(df['sentiment_label'].replace(sentiment_convert).tolist(), dtype=torch.float, device=device).unsqueeze(1)] + num_metadata
@@ -169,21 +181,21 @@ def build_dataset(df):
     return ds
 
 
-def get_dataset(split: str):
+def get_dataset(split: str, input_dim_metadata):
     # load and build a split by name: 'train', 'valid', or 'test'
     path = workspace + f"{split}.csv"
     df   = load_data(path)
-    return build_dataset(df)
+    return build_dataset(df, input_dim_metadata)
 
 
-def train_loader(batch_size):
-    ds = get_dataset('train')
+def train_loader(batch_size, input_dim_metadata):
+    ds = get_dataset('train', input_dim_metadata)
     return data.DataLoader(ds, batch_size=batch_size, shuffle=True)
 
-def val_loader(batch_size):
-    ds = get_dataset('valid')
+def val_loader(batch_size, input_dim_metadata):
+    ds = get_dataset('valid', input_dim_metadata)
     return data.DataLoader(ds, batch_size=batch_size)
 
-def test_loader(batch_size):
-    ds = get_dataset('test')
+def test_loader(batch_size, input_dim_metadata):
+    ds = get_dataset('test', input_dim_metadata)
     return data.DataLoader(ds, batch_size=batch_size)
